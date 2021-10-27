@@ -165,6 +165,7 @@ async function updateMap(newMarks, lat, lng){
         return; // manejar aqui el error
     } else {
         history.push({placeName, lat, lng});
+        refreshHistory();
         console.log(history);
         var options = {
             zoom:7,
@@ -182,14 +183,75 @@ async function updateMap(newMarks, lat, lng){
 
 //funcion de marcadores         
 function addMarkerEq(mark, map){
-
+    
     var marker = new google.maps.Marker({
         position: {lat: mark.lat, lng: mark.lng},
         map:map
     });
+
+    const contentInfo = `
+        <h3> Terremoto de magnitud ${mark.magnitude} </h3>
+        <p> Latitud ${mark.lat}</p>
+        <p> Latitud ${mark.lng}</p>
+    `
+
+    var infoMarker = new google.maps.InfoWindow({
+        content: contentInfo
+    });
+
+    marker.addListener("click", () => {
+        infoMarker.open({
+          anchor: marker,
+          map,
+          shouldFocus: false,
+        });
+      });
+}
+
+async function loadHistory() {
+    var html = ''
+    if(history.length != 0) {
+        html+= `<tr>
+        <th>Historial de búsqueda</th></tr>`
+        for(let i = 0; i < history.length; i++){
+            html+=` 
+                <tr>
+                    <td>Búsqueda ${i+1} con nombre: ${history[i].placeName} con latitud: ${history[i].lat} con longitud: ${history[i].lng}</td>
+                </tr>
+            `
+        }
+        
+    }
+    else {
+        html += `
+            <tr> 
+                <td>No tienes historial por el momento</td>
+            </tr>
+        `
+    } 
+    $('#history-table').append(html);
+    
+}
+
+async function refreshHistory(){
+    let temp = document.getElementById('history-table');
+    temp.innerHTML = '';
+    var html = `<tr>
+    <th>Historial de búsqueda</th></tr>`
+    for(let i = 0; i < history.length; i++){
+        html+=` 
+            <tr>
+                <td>Búsqueda ${i+1} con nombre: ${history[i].placeName} con latitud: ${history[i].lat} con longitud: ${history[i].lng}</td>
+            </tr>
+        `
+    }
+    $('#history-table').append(html);
 }
 
 
+window.onload  = function(){
+    loadHistory();
+}
 
 
 document.head.appendChild(script);
