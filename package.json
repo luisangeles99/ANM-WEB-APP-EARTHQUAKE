@@ -1,0 +1,22 @@
+{
+  "name": "anm-web-app-earthquake",
+  "version": "1.0.0",
+  "description": "ANM code assesment",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luisangeles99/ANM-WEB-APP-EARTHQUAKE.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luisangeles99/ANM-WEB-APP-EARTHQUAKE/issues"
+  },
+  "homepage": "https://github.com/luisangeles99/ANM-WEB-APP-EARTHQUAKE#readme",
+  "dependencies": {
+    "geopoint": "^1.0.1"
+  }
+}
