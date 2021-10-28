@@ -7,26 +7,111 @@
     <title>ANM CODE ASSESTMENT</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <h1>Earthquake Search Map</h1>
 
-    <h3>Introduce a city or location</h3>
-    <input id= "cityName" name="city" type="text" placeholder="City/location">
-    <input type="submit" id="search">
+    <div class="jumbotron text-center">
+        <h1>Earthquake Search Map</h1>
+      </div>
 
-    <h2>Your query results!</h2>
-    <div class="map" id="map1"></div>
+    <div class="container">
+        <div class="left-content">
+            <h3>Introduce a city or location</h3>
+            <p>Use a zip code for a more accurate search.</p>
+            <div class="row text-center">
+                <input class="form-inline" id= "cityName" name="city" type="text" placeholder="City/location">
+                <input class="form-inline"
+                oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+                type="number" max="99999"  maxlength="5" id="zipCode" placeholder="ZIP Code" disabled>
+                <input class="form-check-input" type="checkbox" name="ZIP" id="check-zip"> Use ZIP code
+            </div>
 
-    <h2>Strongest earthquakes available in GeoNamesAPI last 12 months</h2>
-    <div class="map" id="map2"></div>
+            <div id="alert-form" class="alert alert-danger hidden"></div>
+            <div id="alert-map" class="alert alert-info hidden"></div>
+            
+            <div class="btn-submit text-center">
+                <input type="submit" id="search" class="btn btn-default btn-lg">
+            </div>
+            <div class="row">
+                <div class="col-sm-8 map-result">
+                    <h2>City/Place earthquakes</h2>
+                    <div class="map" id="map1"></div>
+                </div>
+                <div class="col-sm-4 table-responsive">
+                    <h3>List of earthquakes</h3>
+                    <div class="table-div">
+                        <table class="table table-content">
+                            <thead>
+                                <tr>
+                                    <th>Num</th>
+                                    <th>Magnitude</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-eq-0">
+        
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h3>Search history</h3>
+                    <div class="table-div">
+                        <table class="table table-content">
+                            <thead>
+                                <tr>
+                                    <th>Search</th>
+                                    <th>City/Location</th>
+                                    <th>ZIP code</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table">
+        
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <hr class="my-12"/>
+            
+            <div class="row">
+                <div class="col-sm-8 map-result">
+                    <h2>Strongest earthquakes in GeoNamesAPI</h2>
+                    <h4>Last 12 months</h4>
+                    <div class="map" id="map2"></div>
+                </div>
+                <div class="col-sm-4 table-responsive ">
+                    <h3>List of earthquakes</h3>
+                    <div class="table-div-two">
+                        <table class="table table-content">
+                            <thead>
+                                <tr>
+                                    <th>Num</th>
+                                    <th>Magnitude</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-eq-1">
+        
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+
+    <hr class="my-12"/>
+   
     
-
     <script defer src="../js/index.js"></script>
-
-    <table id="history-table">
-
-    </table>
 
 </body>
 </html>
