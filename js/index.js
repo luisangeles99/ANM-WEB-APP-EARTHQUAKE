@@ -8,6 +8,9 @@ let history = JSON.parse(sessionStorage.getItem('historyArray'));
 if(!history) {
     history = [];
 }
+
+
+
 let placeName = '';
 let zip = '';
 
@@ -120,16 +123,9 @@ $('#search').on('click', async function(){
             });
         });
     }
-        
-
-    
-    
-
-    
-
 });
 
-
+//GET EARTHQUAKES IN BBOX PROVIDED
 async function getEarthquakesCityLocation(latMin, latMax, longMin, longMax, lat, lng) {
     return new Promise((resolve, reject) => {
         $.ajax({ 
@@ -150,29 +146,7 @@ async function getEarthquakesCityLocation(latMin, latMax, longMin, longMax, lat,
 }
 
 
-//BONUS Show 12 last biggest EQ
-async function getRecentEq (){
-    return new Promise((resolve, reject) => {
-        $.ajax({
-        
-            url: 'http://api.geonames.org/earthquakesJSON?north=90&south=-90&east=180&west=-180&username=luisangeles99',
-            method: 'GET',
-            dataType: 'json',
-            success: (data) =>{
-                
-                resolve(data);
-            },
-            error: (error) =>{
-                console.log('error' + error);
-                reject(error);
-                
-            }
-        });
-    })
-    
-}
-
-//MAPS Generated
+//MAPS Generated USING GOOGLE API
 async function initMap (markers){
     var options1 = {
         zoom:7,
@@ -184,34 +158,20 @@ async function initMap (markers){
         center:{lat: 0, lng:0}
     }
 
-    //First map will display an example city
+    //First map will display MONTERREY
     var map = new google.maps.Map(document.getElementById('map1'), options1);
 
     if(markers !== undefined) {
         for(let i = 0; i < markers.length; i++) {
-            addMarkerEq(markers[i], map, i)
+            addMarkerEq(markers[i], map, i);
         }
     }
 
-    var marker = new google.maps.Marker({
-        position: {lat: 25.686613, lng: -100.316116},
-        map:map
-    });
-
+    //SECOND WILL SHOW LAST YEAR RECENT EARTHQUAKES
     var map2 = new google.maps.Map(document.getElementById('map2'), options2);
 
-    markers2 = [
-        {lat: 10, lng:20},
-        {lat: 50, lng:10}
-    ]
+    marks = biggestEq
 
-    marks = await getRecentEq();
-    
-    if (!marks) {
-        marks = markers2;
-    } else{
-        marks = marks.earthquakes
-    }
 
     loadEqLists(marks, '1');
 
@@ -221,6 +181,7 @@ async function initMap (markers){
 
 }
 
+//UPDATE MAP1 AFTER A SUCCESFUL FORM SUBMISSION
 async function updateMap(newMarks, lat, lng){
     if(newMarks.length == 0){
         
@@ -230,7 +191,7 @@ async function updateMap(newMarks, lat, lng){
         }
 
         var map = new google.maps.Map(document.getElementById('map1'), options);
-        alertInfo('No earthquakes found in ' + placeName + 'try using zip code or another place.');
+        alertInfo('No earthquakes found in ' + placeName + ' try using zip code or another place.');
         return; // manejar aqui el error
     } else {
 
@@ -246,8 +207,6 @@ async function updateMap(newMarks, lat, lng){
         }
 
         sessionStorage.setItem('historyArray', JSON.stringify(history));
-        var aux = JSON.parse(sessionStorage.getItem('historyArray'));
-        console.log(aux);
 
         //refresh list of history
         refreshHistory();
@@ -268,7 +227,7 @@ async function updateMap(newMarks, lat, lng){
 }
 
 
-//funcion de marcadores         
+// ADD MARKERS AND INFO WINDOW       
 function addMarkerEq(mark, map, number){
     var marker = new google.maps.Marker({
         
@@ -278,9 +237,9 @@ function addMarkerEq(mark, map, number){
     });
 
     const contentInfo = `
-        <h3> Terremoto de magnitud ${mark.magnitude} </h3>
-        <p> Latitud ${mark.lat}</p>
-        <p> Latitud ${mark.lng}</p>
+        <h3> Earthquake magnitude ${mark.magnitude} </h3>
+        <p> Latitude ${mark.lat}</p>
+        <p> Longitude ${mark.lng}</p>
     `
 
     var infoMarker = new google.maps.InfoWindow({
@@ -317,7 +276,7 @@ async function loadEqLists(markers, table){
 }
 
 
-
+//FUNCTION TO LOAD FROM SESSION STORAGE HISTORY
 async function loadHistory() {
     var html = ''
     if(history.length != 0) {
@@ -342,6 +301,7 @@ async function loadHistory() {
     
 }
 
+//FUNCTION TO REFRESH TABLE AFTER NEW SEARCH
 async function refreshHistory(){
     let temp = document.getElementById('history-table');
     temp.innerHTML = '';
@@ -373,6 +333,9 @@ $('#check-zip').on('click', function(){
     }
 })
 
+
+/***********  ALERT FUNCTIONS   *************/
+
 function alertContent(message) {
 
     if($('#alert-form').hasClass('hidden')) {
@@ -396,7 +359,141 @@ function alertInfo(message) {
 
 window.onload  = function(){
     loadHistory();
+    //$(".loader").fadeOut();
+    
 }
 
 
 document.head.appendChild(script);
+
+/***********   BONUS       ***********/
+// DUE TO THE LIMIT OF 1000 CREDITS BY USER; THE BONUS HAD TO BE REQUESTED BEFORE AND NOW IS A GLOBAL VARIABLE
+
+//sort array BY MAGNITUDE
+function orderEqs(prop){
+    return function(a, b) {    
+        if (a[prop] < b[prop]) {    
+            return 1;    
+        } else if (a[prop] > b[prop]) {    
+            return -1;    
+        }    
+        return 0;    
+    }  
+}
+
+
+//365 requests per each day, api does not allow date ranges
+async function getLastYearEqs(){
+    var date = new Date(2020, 9, 28);
+    var temp = [];
+    biggestEq = await getRecentEq2(date.toISOString().slice(0, 10));
+    biggestEq = biggestEq.earthquakes;
+    date.setDate(date.getDate() + 1);
+
+    
+    for(let i = 0; i < 364; i++) {
+        temp = await getRecentEq2(date.toISOString().slice(0, 10));
+        temp = temp.earthquakes;
+        biggestEq = biggestEq.concat(temp);
+        biggestEq.sort(orderEqs('magnitude'));
+        biggestEq.splice(biggestEq.length -10 ,10); //DROP THE LAST 10 ELEMENTS AFTER SORT
+        date.setDate(date.getDate() + 1); //ADD 1 DAY TO DATE
+        console.log(biggestEq);
+    }
+    sessionStorage.setItem('bigEqs', JSON.stringify(biggestEq));
+}
+
+
+
+//get the earthquakes per date
+async function getRecentEq2 (date){
+    return new Promise((resolve, reject) => {
+        $.ajax({
+        
+            url: 'http://api.geonames.org/earthquakesJSON?north=90&south=-90&east=180&west=-180&date=' + date + '&username=luisangeles99',
+            method: 'GET',
+            dataType: 'json',
+            success: (data) =>{
+                resolve(data);
+            },
+            error: (error) =>{
+                console.log('error' + error);
+                reject(error);
+                
+            }
+        });
+    })
+    
+}
+
+//result after running the functions.
+let biggestEq = [{"datetime": "2021-07-29 06:23:56",
+"depth": 32.2,
+"eqid": "ak0219neiszm",
+"lat": 55.3248,
+"lng": -157.8414,
+"magnitude": 8.2,
+"src": "ak"},
+{"datetime": "2021-03-04 19:40:50",
+"depth": 19.4,
+"eqid": "us7000dflf",
+"lat": -29.7399,
+"lng": -177.2672,
+"magnitude": 8.1,
+"src": "us"},
+{"datetime": "2021-08-12 18:51:29",
+"depth": 55.73,
+"eqid": "us6000f53e",
+"lat": -58.4513,
+"lng": -25.327,
+"magnitude": 8.1,
+"src": "us"},
+{"datetime": "2021-02-10 13:22:20",
+"depth": 10,
+"eqid": "us6000dg77",
+"lat": -23.2507,
+"lng": 171.4851,
+"magnitude": 7.7,
+"src": "us"},
+{"datetime": "2021-08-12 18:40:54",
+"depth": 63.25,
+"eqid": "us6000f4ly",
+"lat": -57.5959,
+"lng": -25.1874,
+"magnitude": 7.5,
+"src": "us"},
+{"datetime": "2021-03-04 17:51:15",
+"depth": 55.57,
+"eqid": "us7000dfk3",
+"lat": -29.6131,
+"lng": -177.8425,
+"magnitude": 7.4,
+"src": "us"},
+{"datetime": "2021-03-04 13:34:44",
+"depth": 20.78,
+"eqid": "us7000dffl",
+"lat": -37.5628,
+"lng": 179.4443,
+"magnitude": 7.3,
+"src": "us"},
+{"datetime": "2021-05-21 18:15:15",
+"depth": 10,
+"eqid": "us7000e54r",
+"lat": 34.5864,
+"lng": 98.2548,
+"magnitude": 7.3,
+"src": "us"},
+{"datetime": "2021-10-02 06:43:05",
+"depth": 535.79,
+"eqid": "us6000fr0b",
+"lat": -21.1036,
+"lng": 174.8945,
+"magnitude": 7.3,
+"src": "us"},
+{"datetime": "2021-10-02 06:43:05",
+"depth": 535.79,
+"eqid": "us6000fr0b",
+"lat": -21.1036,
+"lng": 174.8945,
+"magnitude": 7.3,
+"src": "us"}];

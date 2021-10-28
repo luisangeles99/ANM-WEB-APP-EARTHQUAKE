@@ -13,3 +13,8 @@ http://www.geonames.org/
 Google Maps JS API
 https://developers.google.com/maps/documentation/javascript/overview
 
+# Considerations
+- Bonus uses a global variable with data fetched previously due to the limit in requests per hour in GEONAMES API.
+- Using ZIP code increases the accuracy of search.
+- Due to GEONAMES not using https the web host does not use https.
+- SessionStorage is used for search history so closing tab resets the history.
